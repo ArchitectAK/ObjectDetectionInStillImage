@@ -10,7 +10,7 @@ import UIKit
 import Photos
 import Vision
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     // Switches to toggle types of Vision requests ON/OFF
     
