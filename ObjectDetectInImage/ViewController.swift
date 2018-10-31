@@ -25,6 +25,20 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var imageView: UIImageView!
     
+    
+    
+    // Layer into which to draw bounding box paths.
+    var pathLayer: CALayer?
+    
+    // Image parameters for reuse throughout app
+    var imageWidth: CGFloat = 0
+    var imageHeight: CGFloat = 0
+    
+    // Background is black, so display status bar in white.
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
