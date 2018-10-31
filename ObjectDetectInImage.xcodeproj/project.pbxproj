@@ -14,6 +14,7 @@
 		EF1A5F8821899EE2003D373F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EF1A5F8621899EE2003D373F /* LaunchScreen.storyboard */; };
 		EF1A5F9321899EE2003D373F /* ObjectDetectInImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF1A5F9221899EE2003D373F /* ObjectDetectInImageTests.swift */; };
 		EF1A5F9E21899EE2003D373F /* ObjectDetectInImageUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF1A5F9D21899EE2003D373F /* ObjectDetectInImageUITests.swift */; };
+		EF1A5FAC2189B791003D373F /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF1A5FAB2189B791003D373F /* Utils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 		EF1A5F9921899EE2003D373F /* ObjectDetectInImageUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ObjectDetectInImageUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF1A5F9D21899EE2003D373F /* ObjectDetectInImageUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectDetectInImageUITests.swift; sourceTree = "<group>"; };
 		EF1A5F9F21899EE2003D373F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EF1A5FAB2189B791003D373F /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +105,7 @@
 				EF1A5F8421899EE2003D373F /* Assets.xcassets */,
 				EF1A5F8621899EE2003D373F /* LaunchScreen.storyboard */,
 				EF1A5F8921899EE2003D373F /* Info.plist */,
+				EF1A5FAB2189B791003D373F /* Utils.swift */,
 			);
 			path = ObjectDetectInImage;
 			sourceTree = "<group>";
@@ -258,6 +261,7 @@
 			files = (
 				EF1A5F8021899EE0003D373F /* ViewController.swift in Sources */,
 				EF1A5F7E21899EE0003D373F /* AppDelegate.swift in Sources */,
+				EF1A5FAC2189B791003D373F /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
