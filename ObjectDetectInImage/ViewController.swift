@@ -41,9 +41,71 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        // Tapping the image view brings up the photo picker.
+        let photoTap = UITapGestureRecognizer(target: self, action: #selector(promptPhoto))
+        self.view.addGestureRecognizer(photoTap)
+        
+        // Prompt user for a photo shortly after launch
+        perform(#selector(promptPhoto), with: nil, afterDelay: 0.1)
     }
-
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if imageView.image == nil {
+            promptPhoto()
+        }
+    }
+    
+    @objc
+    func promptPhoto() {
+        
+        let prompt = UIAlertController(title: "Choose a Photo",
+                                       message: "Please choose a photo.",
+                                       preferredStyle: .actionSheet)
+        
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        
+        func presentCamera(_ _: UIAlertAction) {
+            imagePicker.sourceType = .camera
+            self.present(imagePicker, animated: true)
+        }
+        
+        let cameraAction = UIAlertAction(title: "Camera",
+                                         style: .default,
+                                         handler: presentCamera)
+        
+        func presentLibrary(_ _: UIAlertAction) {
+            imagePicker.sourceType = .photoLibrary
+            self.present(imagePicker, animated: true)
+        }
+        
+        let libraryAction = UIAlertAction(title: "Photo Library",
+                                          style: .default,
+                                          handler: presentLibrary)
+        
+        func presentAlbums(_ _: UIAlertAction) {
+            imagePicker.sourceType = .savedPhotosAlbum
+            self.present(imagePicker, animated: true)
+        }
+        
+        let albumsAction = UIAlertAction(title: "Saved Albums",
+                                         style: .default,
+                                         handler: presentAlbums)
+        
+        let cancelAction = UIAlertAction(title: "Cancel",
+                                         style: .cancel,
+                                         handler: nil)
+        
+        prompt.addAction(cameraAction)
+        prompt.addAction(libraryAction)
+        prompt.addAction(albumsAction)
+        prompt.addAction(cancelAction)
+        
+        self.present(prompt, animated: true, completion: nil)
+    }
+    
 
 }
 
