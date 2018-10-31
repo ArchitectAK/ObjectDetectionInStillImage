@@ -12,6 +12,19 @@ import Vision
 
 class ViewController: UIViewController {
 
+    // Switches to toggle types of Vision requests ON/OFF
+    
+    @IBOutlet weak var rectSwitch: UISwitch!
+    
+    @IBOutlet weak var faceSwitch: UISwitch!
+    
+    @IBOutlet weak var textSwitch: UISwitch!
+    
+    @IBOutlet weak var barcodeSwitch: UISwitch!
+    
+    
+    @IBOutlet weak var imageView: UIImageView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
