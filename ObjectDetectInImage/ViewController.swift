@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Photos
+import Vision
 
 class ViewController: UIViewController {
 
