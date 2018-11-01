@@ -11,7 +11,7 @@ import Photos
 import Vision
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-
+    
     // Switches to toggle types of Vision requests ON/OFF
     
     @IBOutlet weak var rectSwitch: UISwitch!
@@ -183,6 +183,140 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
         }
     }
-
+    
+    func presentAlert(_ title: String, error: NSError) {
+        // Always present alert on main thread.
+        DispatchQueue.main.async {
+            let alertController = UIAlertController(title: title,
+                                                    message: error.localizedDescription,
+                                                    preferredStyle: .alert)
+            let okAction = UIAlertAction(title: "OK",
+                                         style: .default) { _ in
+                                            // Do nothing -- simply dismiss alert.
+            }
+            alertController.addAction(okAction)
+            self.present(alertController, animated: true, completion: nil)
+        }
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        // Dismiss picker, returning to original root viewController.
+        dismiss(animated: true, completion: nil)
+    }
+    
+    internal func imagePickerController(_ picker: UIImagePickerController,
+                                        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        // Extract chosen image.
+        let originalImage: UIImage = info[UIImagePickerController.InfoKey.originalImage] as! UIImage
+        
+        // Display image on screen.
+        show(originalImage)
+        
+        // Convert from UIImageOrientation to CGImagePropertyOrientation.
+        let cgOrientation = CGImagePropertyOrientation(originalImage.imageOrientation)
+        
+        // Fire off request based on URL of chosen photo.
+        guard let cgImage = originalImage.cgImage else {
+            return
+        }
+        performVisionRequest(image: cgImage,
+                             orientation: cgOrientation)
+        
+        // Dismiss the picker to return to original view controller.
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func show(_ image: UIImage) {
+        
+        // Remove previous paths & image
+        pathLayer?.removeFromSuperlayer()
+        pathLayer = nil
+        imageView.image = nil
+        
+        // Account for image orientation by transforming view.
+        let correctedImage = scaleAndOrient(image: image)
+        
+        // Place photo inside imageView.
+        imageView.image = correctedImage
+        
+        // Transform image to fit screen.
+        guard let cgImage = correctedImage.cgImage else {
+            print("Trying to show an image not backed by CGImage!")
+            return
+        }
+        
+        let fullImageWidth = CGFloat(cgImage.width)
+        let fullImageHeight = CGFloat(cgImage.height)
+        
+        let imageFrame = imageView.frame
+        let widthRatio = fullImageWidth / imageFrame.width
+        let heightRatio = fullImageHeight / imageFrame.height
+        
+        // ScaleAspectFit: The image will be scaled down according to the stricter dimension.
+        let scaleDownRatio = max(widthRatio, heightRatio)
+        
+        // Cache image dimensions to reference when drawing CALayer paths.
+        imageWidth = fullImageWidth / scaleDownRatio
+        imageHeight = fullImageHeight / scaleDownRatio
+        
+        // Prepare pathLayer to hold Vision results.
+        let xLayer = (imageFrame.width - imageWidth) / 2
+        let yLayer = imageView.frame.minY + (imageFrame.height - imageHeight) / 2
+        let drawingLayer = CALayer()
+        drawingLayer.bounds = CGRect(x: xLayer, y: yLayer, width: imageWidth, height: imageHeight)
+        drawingLayer.anchorPoint = CGPoint.zero
+        drawingLayer.position = CGPoint(x: xLayer, y: yLayer)
+        drawingLayer.opacity = 0.5
+        pathLayer = drawingLayer
+        self.view.layer.addSublayer(pathLayer!)
+    }
+    ///  PerformRequests
+    fileprivate func performVisionRequest(image: CGImage, orientation: CGImagePropertyOrientation) {
+        
+        // Fetch desired requests based on switch status.
+        let requests = createVisionRequests()
+        // Create a request handler.
+        let imageRequestHandler = VNImageRequestHandler(cgImage: image,
+                                                        orientation: orientation,
+                                                        options: [:])
+        
+        // Send the requests to the request handler.
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try imageRequestHandler.perform(requests)
+            } catch let error as NSError {
+                print("Failed to perform image request: \(error)")
+                self.presentAlert("Image Request Failed", error: error)
+                return
+            }
+        }
+    }
+    
+    ///  CreateRequests
+    fileprivate func createVisionRequests() -> [VNRequest] {
+        
+        // Create an array to collect all desired requests.
+        var requests: [VNRequest] = []
+        
+        // Create & include a request if and only if switch is ON.
+        if self.rectSwitch.isOn {
+            requests.append(self.rectangleDetectionRequest)
+        }
+        if self.faceSwitch.isOn {
+            // Break rectangle & face landmark detection into 2 stages to have more fluid feedback in UI.
+            requests.append(self.faceDetectionRequest)
+            requests.append(self.faceLandmarkRequest)
+        }
+        if self.textSwitch.isOn {
+            requests.append(self.textDetectionRequest)
+        }
+        if self.barcodeSwitch.isOn {
+            requests.append(self.barcodeDetectionRequest)
+        }
+        
+        // Return grouped requests as a single array.
+        return requests
+    }
+    
 }
 
