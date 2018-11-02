@@ -318,5 +318,86 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         return requests
     }
     
+    fileprivate func handleDetectedRectangles(request: VNRequest?, error: Error?) {
+        if let nsError = error as NSError? {
+            self.presentAlert("Rectangle Detection Error", error: nsError)
+            return
+        }
+        // Since handlers are executing on a background thread, explicitly send draw calls to the main thread.
+        DispatchQueue.main.async {
+            guard let drawLayer = self.pathLayer,
+                let results = request?.results as? [VNRectangleObservation] else {
+                    return
+            }
+            self.draw(rectangles: results, onImageWithBounds: drawLayer.bounds)
+            drawLayer.setNeedsDisplay()
+        }
+    }
+    
+    fileprivate func handleDetectedFaces(request: VNRequest?, error: Error?) {
+        if let nsError = error as NSError? {
+            self.presentAlert("Face Detection Error", error: nsError)
+            return
+        }
+        // Perform drawing on the main thread.
+        DispatchQueue.main.async {
+            guard let drawLayer = self.pathLayer,
+                let results = request?.results as? [VNFaceObservation] else {
+                    return
+            }
+            self.draw(faces: results, onImageWithBounds: drawLayer.bounds)
+            drawLayer.setNeedsDisplay()
+        }
+    }
+    
+    fileprivate func handleDetectedFaceLandmarks(request: VNRequest?, error: Error?) {
+        if let nsError = error as NSError? {
+            self.presentAlert("Face Landmark Detection Error", error: nsError)
+            return
+        }
+        // Perform drawing on the main thread.
+        DispatchQueue.main.async {
+            guard let drawLayer = self.pathLayer,
+                let results = request?.results as? [VNFaceObservation] else {
+                    return
+            }
+            self.drawFeatures(onFaces: results, onImageWithBounds: drawLayer.bounds)
+            drawLayer.setNeedsDisplay()
+        }
+    }
+    
+    fileprivate func handleDetectedText(request: VNRequest?, error: Error?) {
+        if let nsError = error as NSError? {
+            self.presentAlert("Text Detection Error", error: nsError)
+            return
+        }
+        // Perform drawing on the main thread.
+        DispatchQueue.main.async {
+            guard let drawLayer = self.pathLayer,
+                let results = request?.results as? [VNTextObservation] else {
+                    return
+            }
+            self.draw(text: results, onImageWithBounds: drawLayer.bounds)
+            drawLayer.setNeedsDisplay()
+        }
+    }
+    
+    fileprivate func handleDetectedBarcodes(request: VNRequest?, error: Error?) {
+        if let nsError = error as NSError? {
+            self.presentAlert("Barcode Detection Error", error: nsError)
+            return
+        }
+        // Perform drawing on the main thread.
+        DispatchQueue.main.async {
+            guard let drawLayer = self.pathLayer,
+                let results = request?.results as? [VNBarcodeObservation] else {
+                    return
+            }
+            self.draw(barcodes: results, onImageWithBounds: drawLayer.bounds)
+            drawLayer.setNeedsDisplay()
+        }
+    }
+    
+    
 }
 
