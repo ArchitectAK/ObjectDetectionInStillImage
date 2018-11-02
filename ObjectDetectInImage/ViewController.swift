@@ -472,5 +472,156 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         return layer
     }
     
+    // Rectangles are BLUE.
+    fileprivate func draw(rectangles: [VNRectangleObservation], onImageWithBounds bounds: CGRect) {
+        CATransaction.begin()
+        for observation in rectangles {
+            let rectBox = boundingBox(forRegionOfInterest: observation.boundingBox, withinImageBounds: bounds)
+            let rectLayer = shapeLayer(color: .blue, frame: rectBox)
+            
+            // Add to pathLayer on top of image.
+            pathLayer?.addSublayer(rectLayer)
+        }
+        CATransaction.commit()
+    }
+    
+    // Faces are YELLOW.
+    ///  DrawBoundingBox
+    fileprivate func draw(faces: [VNFaceObservation], onImageWithBounds bounds: CGRect) {
+        CATransaction.begin()
+        for observation in faces {
+            let faceBox = boundingBox(forRegionOfInterest: observation.boundingBox, withinImageBounds: bounds)
+            let faceLayer = shapeLayer(color: .yellow, frame: faceBox)
+            
+            // Add to pathLayer on top of image.
+            pathLayer?.addSublayer(faceLayer)
+        }
+        CATransaction.commit()
+    }
+    
+    // Facial landmarks are GREEN.
+    fileprivate func drawFeatures(onFaces faces: [VNFaceObservation], onImageWithBounds bounds: CGRect) {
+        CATransaction.begin()
+        for faceObservation in faces {
+            let faceBounds = boundingBox(forRegionOfInterest: faceObservation.boundingBox, withinImageBounds: bounds)
+            guard let landmarks = faceObservation.landmarks else {
+                continue
+            }
+            
+            // Iterate through landmarks detected on the current face.
+            let landmarkLayer = CAShapeLayer()
+            let landmarkPath = CGMutablePath()
+            let affineTransform = CGAffineTransform(scaleX: faceBounds.size.width, y: faceBounds.size.height)
+            
+            // Treat eyebrows and lines as open-ended regions when drawing paths.
+            let openLandmarkRegions: [VNFaceLandmarkRegion2D?] = [
+                landmarks.leftEyebrow,
+                landmarks.rightEyebrow,
+                landmarks.faceContour,
+                landmarks.noseCrest,
+                landmarks.medianLine
+            ]
+            
+            // Draw eyes, lips, and nose as closed regions.
+            let closedLandmarkRegions = [
+                landmarks.leftEye,
+                landmarks.rightEye,
+                landmarks.outerLips,
+                landmarks.innerLips,
+                landmarks.nose
+                ].compactMap { $0 } // Filter out missing regions.
+            
+            // Draw paths for the open regions.
+            for openLandmarkRegion in openLandmarkRegions where openLandmarkRegion != nil {
+                landmarkPath.addPoints(in: openLandmarkRegion!,
+                                       applying: affineTransform,
+                                       closingWhenComplete: false)
+            }
+            
+            // Draw paths for the closed regions.
+            for closedLandmarkRegion in closedLandmarkRegions {
+                landmarkPath.addPoints(in: closedLandmarkRegion,
+                                       applying: affineTransform,
+                                       closingWhenComplete: true)
+            }
+            
+            // Format the path's appearance: color, thickness, shadow.
+            landmarkLayer.path = landmarkPath
+            landmarkLayer.lineWidth = 2
+            landmarkLayer.strokeColor = UIColor.green.cgColor
+            landmarkLayer.fillColor = nil
+            landmarkLayer.shadowOpacity = 0.75
+            landmarkLayer.shadowRadius = 4
+            
+            // Locate the path in the parent coordinate system.
+            landmarkLayer.anchorPoint = .zero
+            landmarkLayer.frame = faceBounds
+            landmarkLayer.transform = CATransform3DMakeScale(1, -1, 1)
+            
+            // Add to pathLayer on top of image.
+            pathLayer?.addSublayer(landmarkLayer)
+        }
+        CATransaction.commit()
+    }
+    
+    // Lines of text are RED.  Individual characters are PURPLE.
+    fileprivate func draw(text: [VNTextObservation], onImageWithBounds bounds: CGRect) {
+        CATransaction.begin()
+        for wordObservation in text {
+            let wordBox = boundingBox(forRegionOfInterest: wordObservation.boundingBox, withinImageBounds: bounds)
+            let wordLayer = shapeLayer(color: .red, frame: wordBox)
+            
+            // Add to pathLayer on top of image.
+            pathLayer?.addSublayer(wordLayer)
+            
+            // Iterate through each character within the word and draw its box.
+            guard let charBoxes = wordObservation.characterBoxes else {
+                continue
+            }
+            for charObservation in charBoxes {
+                let charBox = boundingBox(forRegionOfInterest: charObservation.boundingBox, withinImageBounds: bounds)
+                let charLayer = shapeLayer(color: .purple, frame: charBox)
+                charLayer.borderWidth = 1
+                
+                // Add to pathLayer on top of image.
+                pathLayer?.addSublayer(charLayer)
+            }
+        }
+        CATransaction.commit()
+    }
+    
+    // Barcodes are ORANGE.
+    fileprivate func draw(barcodes: [VNBarcodeObservation], onImageWithBounds bounds: CGRect) {
+        CATransaction.begin()
+        for observation in barcodes {
+            let barcodeBox = boundingBox(forRegionOfInterest: observation.boundingBox, withinImageBounds: bounds)
+            let barcodeLayer = shapeLayer(color: .orange, frame: barcodeBox)
+            
+            // Add to pathLayer on top of image.
+            pathLayer?.addSublayer(barcodeLayer)
+        }
+        CATransaction.commit()
+    }
+}
+
+private extension CGMutablePath {
+    // Helper function to add lines to a path.
+    func addPoints(in landmarkRegion: VNFaceLandmarkRegion2D,
+                   applying affineTransform: CGAffineTransform,
+                   closingWhenComplete closePath: Bool) {
+        let pointCount = landmarkRegion.pointCount
+        
+        // Draw line if and only if path contains multiple points.
+        guard pointCount > 1 else {
+            return
+        }
+        self.addLines(between: landmarkRegion.normalizedPoints, transform: affineTransform)
+        
+        if closePath {
+            self.closeSubpath()
+        }
+    }
+
+    
 }
 
