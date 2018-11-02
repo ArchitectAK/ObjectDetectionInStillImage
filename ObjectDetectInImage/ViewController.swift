@@ -398,6 +398,33 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
     
+    ///  ConfigureCompletionHandler
+    lazy var rectangleDetectionRequest: VNDetectRectanglesRequest = {
+        let rectDetectRequest = VNDetectRectanglesRequest(completionHandler: self.handleDetectedRectangles)
+        // Customize & configure the request to detect only certain rectangles.
+        rectDetectRequest.maximumObservations = 8 // Vision currently supports up to 16.
+        rectDetectRequest.minimumConfidence = 0.6 // Be confident.
+        rectDetectRequest.minimumAspectRatio = 0.3 // height / width
+        return rectDetectRequest
+    }()
+    
+    lazy var faceDetectionRequest = VNDetectFaceRectanglesRequest(completionHandler: self.handleDetectedFaces)
+    lazy var faceLandmarkRequest = VNDetectFaceLandmarksRequest(completionHandler: self.handleDetectedFaceLandmarks)
+    
+    lazy var textDetectionRequest: VNDetectTextRectanglesRequest = {
+        let textDetectRequest = VNDetectTextRectanglesRequest(completionHandler: self.handleDetectedText)
+        // Tell Vision to report bounding box around each character.
+        textDetectRequest.reportCharacterBoxes = true
+        return textDetectRequest
+    }()
+    
+    lazy var barcodeDetectionRequest: VNDetectBarcodesRequest = {
+        let barcodeDetectRequest = VNDetectBarcodesRequest(completionHandler: self.handleDetectedBarcodes)
+        // Restrict detection to most common symbologies.
+        barcodeDetectRequest.symbologies = [.QR, .Aztec, .UPCE]
+        return barcodeDetectRequest
+    }()
+    
     
 }
 
