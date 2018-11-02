@@ -426,5 +426,29 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }()
     
     
+    // MARK: - Path-Drawing
+    
+    fileprivate func boundingBox(forRegionOfInterest: CGRect, withinImageBounds bounds: CGRect) -> CGRect {
+        
+        let imageWidth = bounds.width
+        let imageHeight = bounds.height
+        
+        // Begin with input rect.
+        var rect = forRegionOfInterest
+        
+        // Reposition origin.
+        rect.origin.x *= imageWidth
+        rect.origin.x += bounds.origin.x
+        rect.origin.y = (1 - rect.origin.y) * imageHeight + bounds.origin.y
+        
+        // Rescale normalized coordinates.
+        rect.size.width *= imageWidth
+        rect.size.height *= imageHeight
+        
+        return rect
+    }
+    
+    
+    
 }
 
